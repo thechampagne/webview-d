@@ -1,0 +1,14 @@
+.dub
+docs.json
+__dummy.html
+/webview
+webview.so
+webview.dylib
+webview.dll
+webview.a
+webview.lib
+webview-test-*
+*.exe
+*.o
+*.obj
+*.lst

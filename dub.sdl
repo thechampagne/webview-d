@@ -1,0 +1,5 @@
+name "webview"
+description "Binding for a tiny cross-platform webview library to build modern cross-platform GUIs"
+authors "XXIV"
+copyright "Copyright © 2023, XXIV"
+license "MIT"
