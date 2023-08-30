@@ -23,6 +23,8 @@ module webview.raw;
 
 extern (C):
 
+// Documentation copied from https://github.com/webview/webview/blob/master/webview.h
+
 // The current library major version.
 enum WEBVIEW_VERSION_MAJOR = 0;
 
