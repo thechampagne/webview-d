@@ -1,0 +1,7 @@
+name "basic"
+description "A minimal D application."
+authors "xxiv"
+copyright "Copyright © 2023, xxiv"
+license "MIT"
+dependency "webview" version="~>0.1.0"
+libs "webview"
