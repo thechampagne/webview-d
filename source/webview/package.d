@@ -21,14 +21,14 @@
  */
 module webview;
 
-import std.string : toStringz;
+import std.string : toStringz, fromStringz;
 import webview.raw;
 
 alias WebViewVersionInfo = webview_version_info_t;
 
-extern(C) alias DispatchCallback = void function (webview_t w, void* arg);
+alias DispatchCallback = extern(C) void function (WebView w, void* arg);
 
-extern(C) alias BindCallback = void function (const(char)* seq, const(char)* req, void* arg);
+alias BindCallback = extern(C) void function (string seq, string req, void* arg);
 
 enum WindowSizeHint
 {
@@ -59,7 +59,19 @@ struct WebView
 
   void dispatch(DispatchCallback fn, void* arg)
   {
-    webview_dispatch(this.webview, fn, arg);
+    struct RegisterCallback
+    {
+      static WebView _this;
+      static DispatchCallback Callback;
+      extern(C) static void call(webview_t w, void* arg)
+      {
+	_this.webview = w;
+	Callback(_this, arg);
+      }
+    };
+    RegisterCallback._this = this;
+    RegisterCallback.Callback = fn;
+    webview_dispatch(this.webview, &RegisterCallback.call, arg);
   }
 
   void* getWindow()
@@ -99,7 +111,16 @@ struct WebView
 
   void bind(string name, BindCallback fn, void* arg)
   {
-    webview_bind(this.webview, name.toStringz, fn, arg);
+    struct RegisterCallback
+    {
+      static BindCallback Callback;
+      extern(C) static void call(const(char)* seq, const(char)* req, void* arg)
+      {
+	Callback(cast(string)(seq.fromStringz), cast(string)(req.fromStringz), arg);
+      }
+    };
+    RegisterCallback.Callback = fn;
+    webview_bind(this.webview, name.toStringz, &RegisterCallback.call, arg);
   }
 
   void unbind(string name)
