@@ -38,6 +38,12 @@ enum WindowSizeHint
  Fixed
 }
 
+struct CallbackContext(T)
+{
+  T func;
+  void* data = null;
+}
+
 struct WebView
 {
   private webview_t webview;
@@ -57,21 +63,19 @@ struct WebView
     webview_terminate(this.webview);
   }
 
-  void dispatch(DispatchCallback fn, void* arg)
+  void dispatch(CallbackContext!(DispatchCallback)* ctx)
   {
     struct RegisterCallback
     {
-      static WebView _this;
-      static DispatchCallback Callback;
       extern(C) static void call(webview_t w, void* arg)
       {
-	_this.webview = w;
-	Callback(_this, arg);
+	CallbackContext!(DispatchCallback)* cb = cast(CallbackContext!(DispatchCallback)*)arg;
+	WebView webview;
+	webview.webview = w;
+	cb.func(webview, cb.data);
       }
     };
-    RegisterCallback._this = this;
-    RegisterCallback.Callback = fn;
-    webview_dispatch(this.webview, &RegisterCallback.call, arg);
+    webview_dispatch(this.webview, &RegisterCallback.call, ctx);
   }
 
   void* getWindow()
@@ -109,18 +113,17 @@ struct WebView
     webview_eval(this.webview, js.toStringz);
   }
 
-  void bind(string name, BindCallback fn, void* arg)
+  void bind(string name, CallbackContext!(BindCallback)* ctx)
   {
     struct RegisterCallback
     {
-      static BindCallback Callback;
       extern(C) static void call(const(char)* seq, const(char)* req, void* arg)
       {
-	Callback(cast(string)(seq.fromStringz), cast(string)(req.fromStringz), arg);
+	CallbackContext!(BindCallback)* cb = cast(CallbackContext!(BindCallback)*)arg;
+	cb.func(cast(string)(seq.fromStringz), cast(string)(req.fromStringz), cb.data);
       }
     };
-    RegisterCallback.Callback = fn;
-    webview_bind(this.webview, name.toStringz, &RegisterCallback.call, arg);
+    webview_bind(this.webview, name.toStringz, &RegisterCallback.call, ctx);
   }
 
   void unbind(string name)
