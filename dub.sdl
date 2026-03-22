@@ -3,3 +3,11 @@ description "Binding for a tiny cross-platform webview library to build modern c
 authors "XXIV"
 copyright "Copyright © 2023, XXIV"
 license "MIT"
+
+targetType "library"
+
+sourceFiles-windows-x86_64 "$PACKAGE_DIR/precompiled/windows-x64/webview.lib"
+lflags-linux-x86_64 "-L$PACKAGE_DIR/precompiled/linux-x86_64/" "-lwebview"
+
+libs-linux "dl" "gtk-3" "webkit2gtk-4.1" "stdc++"
+libs-windows "advapi32" "ole32" "shell32" "shlwapi" "user32" "version"
